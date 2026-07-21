@@ -1,0 +1,103 @@
+# ==========================================
+# 1. Entornos Virtuales de Python
+# ==========================================
+# Archivos y carpetas generados por venv, virtualenv, conda, etc.
+.venv/
+venv/
+ENV/
+env/
+env.bak/
+venv.bak/
+bin/
+include/
+lib/
+lib64/
+share/
+pyvenv.cfg
+
+# ==========================================
+# 2. Caché y Archivos Temporales de Python
+# ==========================================
+# Archivos de bytecode compilado y caché de ejecución
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# ==========================================
+# 3. Variables de Entorno y Configuración Sensible
+# ==========================================
+# NUNCA subir claves de API, contraseñas o configuraciones locales
+.env
+.env.*
+!.env.example
+!.env.template
+*.local
+
+# ==========================================
+# 4. Bases de Datos Locales y Storage
+# ==========================================
+# Bases de datos SQLite creadas localmente durante las pruebas
+*.db
+*.sqlite
+*.sqlite3
+
+# Archivos estáticos o subidas de usuarios en desarrollo local
+/static/uploads/
+/media/
+
+# ==========================================
+# 5. Pruebas, Cobertura y Linter
+# ==========================================
+# Archivos generados por pytest, mypy, ruff, coverage, etc.
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.mypy_cache/
+.ruff_cache/
+.tox/
+.nox/
+
+# ==========================================
+# 6. Archivos del Sistema Operativo
+# ==========================================
+# Archivos temporales creados por macOS y Windows
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# ==========================================
+# 7. Editores de Código e IDEs
+# ==========================================
+# Configuraciones personales de VS Code, PyCharm, etc.
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.idea/
+*.iws
+*.iml
+*.ipr
+.project
+.pydevproject
+
+# ==========================================
+# 8. Contenedores y Despliegue (Docker / Serverless)
+# ==========================================
+# Logs de ejecuciones y archivos temporales de empaquetado
+*.log
+docker-compose.override.yml
+.build/
+.aws-sam/
+.serverless/
