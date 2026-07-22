@@ -6,6 +6,7 @@ from sqlalchemy import String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.models.base import Base
+from app.models.types import UTCDateTime
 
 
 class Message(Base):
@@ -24,9 +25,9 @@ class Message(Base):
     session_id: Mapped[str] = mapped_column(String(255), index=True)
     content: Mapped[str] = mapped_column(String)
     sender: Mapped[str] = mapped_column(String(16))
-    timestamp: Mapped[datetime] = mapped_column()
+    timestamp: Mapped[datetime] = mapped_column(UTCDateTime)
 
     # Enrichment metadata produced by the processing pipeline.
     word_count: Mapped[int] = mapped_column()
     character_count: Mapped[int] = mapped_column()
-    processed_at: Mapped[datetime] = mapped_column()
+    processed_at: Mapped[datetime] = mapped_column(UTCDateTime)
