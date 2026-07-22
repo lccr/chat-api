@@ -18,6 +18,20 @@ uvicorn app.main:app --reload
 El servicio queda disponible en `http://localhost:8000`. \
 Documentación interactiva (OpenAPI): `http://localhost:8000/docs`.
 
+## Configuración
+
+La aplicación se configura por variables de entorno (prefijo `APP_`), que
+pueden definirse en el entorno o en un archivo `.env`. Todas tienen valores
+por defecto razonables para desarrollo local.
+
+| Variable | Descripción | Por defecto |
+| -------- | ----------- | ----------- |
+| `APP_DATABASE_URL` | Cadena de conexión de la base de datos | `sqlite:///./chat_data.db` |
+| `APP_BANNED_WORDS` | Palabras a censurar, separadas por comas | `badword,offensive` |
+| `APP_DEBUG` | Modo debug | `false` |
+| `APP_DEFAULT_PAGE_LIMIT` | Límite de paginación por defecto | `20` |
+| `APP_MAX_PAGE_LIMIT` | Límite máximo de paginación | `100` |
+
 ## Verificación de calidad
 
 ```bash
@@ -81,6 +95,8 @@ Códigos de error: `INVALID_FORMAT` (422), `DUPLICATE_MESSAGE` (409),
 
 El código se organiza en capas, con las dependencias apuntando solo hacia
 adentro:
+
+```
 app/
 ├── api/           # capa HTTP: rutas, cableado de dependencias, manejo de errores
 ├── core/          # configuración, logging, excepciones de dominio
@@ -88,6 +104,7 @@ app/
 ├── services/      # casos de uso + pipeline de procesamiento
 ├── repositories/  # interfaces de persistencia + implementación SQLite
 └── models/        # modelos ORM de SQLAlchemy
+```
 
 El dominio (servicios, pipeline, repositorios) no importa el framework web:
 depende de abstracciones (`Protocol`) y recibe sus colaboradores por
@@ -118,3 +135,34 @@ Las decisiones de arquitectura están documentadas como ADRs en
   un sistema de chat en tiempo real. Evolucionar hacia esto último añadiría
   entidades de sesión y participante, entrega por WebSocket y una capa de
   autorización, sin reescribir las capas actuales.
+
+
+## Docker
+
+La aplicación se empaqueta con un build multi-stage que produce una imagen
+mínima (~66 MB de contenido), ejecutándose como usuario no-root.
+
+Construir la imagen:
+
+```bash
+docker build -t chat-api:local .
+```
+
+Ejecutar el contenedor:
+
+```bash
+docker run -d --name chat-api -p 8000:8000 chat-api:local
+```
+
+El servicio queda disponible en `http://localhost:8000`. \
+El contenedor incluye un `HEALTHCHECK` sobre `/health`;  \
+su estado se ve en la columna `STATUS` de `docker ps` (`healthy` una vez iniciado).
+
+La base de datos SQLite se crea en `/data` dentro del contenedor, que forma
+parte de su sistema de archivos efímero: los datos se pierden al recrear el
+contenedor. Un despliegue persistente montaría un volumen en `/data` o usaría
+una base de datos gestionada (ver [ADR-0004](docs/adr/0004-persistence.md)).
+
+La configuración se realiza por variables de entorno (ver
+[Configuración](#configuración)). En el contenedor, `APP_DATABASE_URL` apunta
+por defecto a `/data/chat_data.db`.
