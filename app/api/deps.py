@@ -39,18 +39,24 @@ def get_engine() -> Engine:
     """Expose the engine so startup code can create the schema."""
     return _engine
 
+def get_session_factory() -> sessionmaker[Session]:
+    """Return the application's session factory (overridable in tests)."""
+    return _SessionFactory
+
 
 # --- Request-scoped dependencies (built per request) ----------------------
 
 
-def get_db_session() -> Iterator[Session]:
+def get_db_session(
+    factory: Annotated[sessionmaker[Session], Depends(get_session_factory)],
+) -> Iterator[Session]:
     """Provide a database session bound to the request lifecycle.
 
     Commits if the request handler returns normally; rolls back on any
-    exception (including domain errors). This is the unit-of-work boundary:
-    repositories flush, this dependency commits.
+    exception. This is the unit-of-work boundary: repositories flush, this
+    dependency commits. The factory is injected so tests can supply their own.
     """
-    session = _SessionFactory()
+    session = factory()
     try:
         yield session
         session.commit()
