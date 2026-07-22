@@ -23,6 +23,8 @@ class SqliteMessageRepository:
         """Persist a new message, translating a unique-key clash to a domain error."""
         self._session.add(message)
         try:
+            # use flush() instead of commit() to avoid committing the transaction here;
+            # the service layer controls the transaction boundary.
             self._session.flush()
         except IntegrityError as exc:
             self._session.rollback()
