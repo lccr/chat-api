@@ -1,7 +1,6 @@
 """Unit tests for the content filter step."""
 
 import pytest
-
 from app.schemas.message import MessageCreate
 from app.services.pipeline.base import ProcessingResult
 from app.services.pipeline.content_filter import ContentFilterStep
