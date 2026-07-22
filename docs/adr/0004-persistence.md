@@ -1,39 +1,42 @@
-# 4. SQLite persistence with a repository seam
+# 4. Persistencia con SQLite tras una costura de repositorio
 
-Date: 2026-07-22
+Fecha: 2026-07-22
 
-## Status
+## Estado
 
-Accepted
+Aceptada
 
-## Context
+## Contexto
 
-The assessment mandates SQLite for simplicity and easy startup. The system
-should also be deployable, and a production deployment would have different
-persistence needs (concurrency, durability, schema evolution).
+El assessment exige SQLite por simplicidad y facilidad de arranque. El sistema
+también debería ser desplegable, y un despliegue de producción tendría
+necesidades de persistencia distintas (concurrencia, durabilidad, evolución
+del esquema).
 
-## Decision
+## Decisión
 
-Use SQLite through SQLAlchemy 2.0, behind the `MessageRepository` seam from
-ADR-0002. Create the schema at startup with `Base.metadata.create_all`.
-Persist all datetimes through a custom `UTCDateTime` type.
+Usar SQLite a través de SQLAlchemy 2.0, tras la costura `MessageRepository`
+del ADR-0002. Crear el esquema al arranque con `Base.metadata.create_all`.
+Persistir todos los datetimes mediante un tipo `UTCDateTime` propio.
 
-## Consequences
+## Consecuencias
 
-- The schema uses a surrogate integer primary key (`id`) distinct from the
-  business identifier (`message_id`), which is enforced unique. This decouples
-  the physical schema from a client-controlled value and keeps joins and
-  indexes efficient.
-- `create_all` is sufficient for this scope but does not handle schema
-  *changes*: a production system would use versioned, reversible migrations
-  (e.g. Alembic). Migrations are deliberately out of scope here.
-- SQLite stores datetimes without timezone and returns them naive. The
-  `UTCDateTime` type normalizes on write and re-attaches UTC on read, so
-  timezone information survives the round trip and every endpoint serializes
-  timestamps consistently.
-- SQLite is single-writer and file-based, which constrains cloud deployment:
-  serverless targets with ephemeral filesystems or multiple instances are
-  unsuitable without a shared, persistent volume. Because persistence sits
-  behind the repository seam, migrating to a managed database (Cloud SQL, RDS,
-  or a serverless Postgres) changes only the composition root and the
-  connection string, not the domain.
+- El esquema usa una clave primaria surrogate entera (`id`) distinta del
+  identificador de negocio (`message_id`), que se impone como único. Esto
+  desacopla el esquema físico de un valor controlado por el cliente y mantiene
+  eficientes los joins y los índices.
+- `create_all` es suficiente para este alcance pero no gestiona *cambios* de
+  esquema: un sistema de producción usaría migraciones versionadas y
+  reversibles (por ejemplo, Alembic). Las migraciones quedan deliberadamente
+  fuera de alcance aquí.
+- SQLite almacena los datetimes sin zona horaria y los devuelve naive. El tipo
+  `UTCDateTime` normaliza al escribir y re-adjunta UTC al leer, de modo que la
+  información de zona horaria sobrevive el ida y vuelta y todos los endpoints
+  serializan las marcas de tiempo de forma consistente.
+- SQLite es de un solo escritor y basado en archivo, lo que restringe el
+  despliegue en la nube: los destinos serverless con sistemas de archivos
+  efímeros o múltiples instancias no son adecuados sin un volumen compartido y
+  persistente. Como la persistencia vive tras la costura del repositorio,
+  migrar a una base de datos gestionada (Cloud SQL, RDS o un Postgres
+  serverless) afecta solo el composition root y la cadena de conexión, no el
+  dominio.
