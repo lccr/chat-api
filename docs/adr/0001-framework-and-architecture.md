@@ -1,34 +1,39 @@
-# 1. Framework and layered architecture
+# 1. Framework y arquitectura por capas
 
-Date: 2026-07-22
+Fecha: 2026-07-22
 
-## Status
+## Estado
 
-Accepted
+Aceptada
 
-## Context
+## Contexto
 
-The assessment allows either Flask or FastAPI and asks for clean
-architecture, dependency injection, SOLID principles, request validation,
-robust error handling and a test suite. A framework and an overall structure
-must be chosen before any code is written.
+El assessment permite usar Flask o FastAPI y pide arquitectura limpia,
+inyección de dependencias, principios SOLID, validación de peticiones, manejo
+de errores robusto y una suite de pruebas. Antes de escribir código hay que
+elegir un framework y una estructura general.
 
-## Decision
+## Decisión
 
-Use **FastAPI** with a layered structure — api / services / repositories /
-schemas / core — where dependencies point inward only: the api layer knows
-the services, the services know the repository abstraction, and the domain
-(services, pipeline, models) never imports the web framework.
+Usar **FastAPI** con una estructura por capas — api / services / repositories
+/ schemas / core — donde las dependencias apuntan solo hacia adentro: la capa
+api conoce a los servicios, los servicios conocen la abstracción del
+repositorio, y el dominio (servicios, pipeline, modelos) nunca importa el
+framework web.
 
-## Consequences
+## Consecuencias
 
-- Pydantic provides declarative request validation and typed contracts; the
-  schema requirements map directly to model definitions.
-- FastAPI's dependency injection enables constructor-style wiring and trivial
-  overrides in tests, with no extra container library.
-- OpenAPI documentation is generated from the same source of truth as the
-  validation, so docs cannot drift from behavior.
-- The async-native foundation keeps the optional WebSocket feature idiomatic.
-- Because the domain never imports FastAPI, the same services, pipeline and
-  repository could be rehosted under Flask by rewriting only the api layer —
-  the basis for the planned mirror implementation.
+- Pydantic aporta validación declarativa de peticiones y contratos tipados;
+  los requisitos de esquema del assessment se mapean directamente a la
+  definición de los modelos.
+- La inyección de dependencias de FastAPI permite un cableado por
+  constructor y sustituciones triviales en pruebas, sin librería de
+  contenedor adicional.
+- La documentación OpenAPI se genera desde la misma fuente de verdad que la
+  validación, así que la documentación no puede desincronizarse del
+  comportamiento.
+- La base async-native mantiene idiomática la funcionalidad opcional de
+  WebSocket.
+- Como el dominio nunca importa FastAPI, los mismos servicios, pipeline y
+  repositorio podrían rehospedarse bajo Flask reescribiendo solo la capa api
+  — la base de la implementación espejo planeada.
