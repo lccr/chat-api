@@ -41,7 +41,7 @@ def get_engine() -> Engine:
 
 def get_session_factory() -> sessionmaker[Session]:
     """Return the application's session factory (overridable in tests)."""
-    return _SessionFactory
+    return _SessionFactory  # pragma: no cover  (overridden in tests)
 
 
 # --- Request-scoped dependencies (built per request) ----------------------

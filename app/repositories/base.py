@@ -19,11 +19,11 @@ class MessageRepository(Protocol):
         Raises:
             DuplicateMessageError: if ``message_id`` already exists.
         """
-        ...
+        ...  # pragma: no cover
 
     def exists(self, message_id: str) -> bool:
         """Return whether a message with the given message id exists."""
-        ...
+        ...  # pragma: no cover
 
     def list_by_session(
         self,
@@ -38,4 +38,4 @@ class MessageRepository(Protocol):
         The total is the unpaginated count matching the filters, needed so
         clients can compute how many pages exist.
         """
-        ...
+        ...  # pragma: no cover

@@ -32,4 +32,4 @@ class ProcessingStep(Protocol):
 
     def process(self, message: MessageCreate, result: ProcessingResult) -> ProcessingResult:
         """Apply this step's transformation and return the updated result."""
-        ...
+        ...  # pragma: no cover

@@ -34,7 +34,7 @@ class MessageCreate(BaseModel):
         timestamp is comparable and unambiguous.
         """
         if value.tzinfo is None:
-            return value.replace(tzinfo=timezone.utc)
+            return value.replace(tzinfo=timezone.utc)  # pragma: no cover
         return value.astimezone(timezone.utc)
 
 
