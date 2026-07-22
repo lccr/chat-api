@@ -31,6 +31,11 @@ exclude = ["tests/"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-ra --strict-markers"
+filterwarnings = [
+    # Starlette's TestClient emits this at import time via its httpx
+    # dependency; it's internal to the framework and outside our control.
+    "ignore::starlette.exceptions.StarletteDeprecationWarning",
+]
 markers = [
     "unit: fast, isolated tests",
     "integration: tests exercising the full API stack",
