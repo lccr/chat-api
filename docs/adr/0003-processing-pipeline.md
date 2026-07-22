@@ -1,42 +1,44 @@
-# 3. Extensible processing pipeline with content censoring
+# 3. Pipeline de procesamiento extensible con censura de contenido
 
-Date: 2026-07-22
+Fecha: 2026-07-22
 
-## Status
+## Estado
 
-Accepted
+Aceptada
 
-## Context
+## Contexto
 
-The assessment requires a processing pipeline that validates the message,
-filters inappropriate content, and adds metadata (word count, character
-count, processing timestamp). The design must make it easy to add processing
-steps later without destabilizing existing ones.
+El assessment requiere un pipeline de procesamiento que valide el mensaje,
+filtre contenido inapropiado y agregue metadatos (conteo de palabras, conteo
+de caracteres, marca de tiempo de procesamiento). El diseño debe facilitar
+agregar pasos de procesamiento más adelante sin desestabilizar los existentes.
 
-## Decision
+## Decisión
 
-Model the pipeline as an ordered list of independent **steps**, each
-conforming to a `ProcessingStep` Protocol and transforming a shared,
-mutable `ProcessingResult`. Adding behavior means appending a step, never
-editing an existing one (Open/Closed).
+Modelar el pipeline como una lista ordenada de **pasos** independientes, cada
+uno conforme a un Protocol `ProcessingStep` y que transforma un
+`ProcessingResult` compartido y mutable. Agregar comportamiento significa
+añadir un paso, nunca editar uno existente (Open/Closed).
 
-For inappropriate content, the filter **censors** banned words by replacing
-them with asterisks of equal length, and stores the censored message. It does
-not reject the message.
+Para el contenido inapropiado, el filtro **censura** las palabras prohibidas
+reemplazándolas por asteriscos de igual longitud, y almacena el mensaje
+censurado. No rechaza el mensaje.
 
-## Consequences
+## Consecuencias
 
-- Format validation is not a pipeline step: it happens earlier, declaratively,
-  in the Pydantic schemas at the API boundary. The pipeline only performs
-  business-level processing (censoring, enrichment).
-- Step order is significant and intentional: the filter runs before the
-  enricher, so metadata describes the stored (censored) content.
-- Word-boundary matching (`\b`) avoids censoring substrings of larger words
-  (the "Scunthorpe problem"); banned words are regex-escaped so metacharacters
-  are treated literally.
-- Censoring keeps every step a pure transformer, consistent with the enricher.
-  A reject-on-violation policy was considered; it was not made a configuration
-  flag because the pipeline is already extensible by design — a rejecting
-  policy would be an alternative step, not a conditional branch. Choosing one
-  documented behavior avoids doubling the test and documentation surface for a
-  need the assessment does not state.
+- La validación de formato no es un paso del pipeline: ocurre antes, de forma
+  declarativa, en los esquemas Pydantic, en la frontera de la API. El pipeline
+  solo realiza procesamiento a nivel de negocio (censura, enriquecimiento).
+- El orden de los pasos es significativo e intencional: el filtro corre antes
+  que el enriquecedor, de modo que los metadatos describan el contenido
+  almacenado (censurado).
+- El emparejamiento por límites de palabra (`\b`) evita censurar subcadenas de
+  palabras más grandes (el "Scunthorpe problem"); las palabras prohibidas se
+  escapan como regex para que los metacaracteres se traten de forma literal.
+- La censura mantiene cada paso como un transformador puro, coherente con el
+  enriquecedor. Se consideró una política de rechazo ante violación; no se
+  implementó como una opción de configuración porque el pipeline ya es
+  extensible por diseño — una política de rechazo sería un paso alternativo, no
+  una rama condicional. Elegir un único comportamiento documentado evita
+  duplicar la superficie de pruebas y documentación para una necesidad que el
+  assessment no plantea.
