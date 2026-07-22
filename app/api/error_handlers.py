@@ -10,6 +10,7 @@ import logging
 from fastapi import FastAPI, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.core.exceptions import DomainError
 from app.schemas.common import ErrorDetail, ErrorResponse
@@ -59,9 +60,19 @@ async def unhandled_error_handler(request: Request, exc: Exception) -> JSONRespo
         content=_envelope("INTERNAL_ERROR", "An unexpected error occurred"),
     )
 
+async def http_exception_handler(
+        request: Request, exc: StarletteHTTPException
+        ) -> JSONResponse:
+     """Wrap framework HTTP errors (404, 405, ...) in the error envelope."""
+     return JSONResponse(
+         status_code=exc.status_code,
+         content=_envelope("HTTP_ERROR", str(exc.detail)),
+         )
+
 
 def register_error_handlers(app: FastAPI) -> None:
     """Attach all handlers to the application."""
     app.add_exception_handler(DomainError, domain_error_handler)  # type: ignore[arg-type]
     app.add_exception_handler(RequestValidationError, validation_error_handler)  # type: ignore[arg-type]
+    app.add_exception_handler(StarletteHTTPException, http_exception_handler)  # type: ignore[arg-type]
     app.add_exception_handler(Exception, unhandled_error_handler)
