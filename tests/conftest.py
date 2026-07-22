@@ -9,7 +9,7 @@ from collections.abc import Callable, Iterator
 from typing import Any
 
 import pytest
-from app.api.deps import get_db_session
+from app.api.deps import get_session_factory
 from app.main import create_app
 from app.models.base import Base
 from app.schemas.message import MessageCreate
@@ -43,41 +43,33 @@ def make_payload() -> Callable[..., MessageCreate]:
 
 
 @pytest.fixture()
-def db_session() -> Iterator[Session]:
-    """Provide an isolated in-memory database session per test.
-
-    Each test gets a fresh SQLite database in memory: full isolation, no disk,
-    no cleanup, and tests can run in any order without interfering.
-    """
+def db_engine():
+    """Provide an isolated in-memory database engine per test."""
     engine = create_engine(
         "sqlite:///:memory:",
         connect_args={"check_same_thread": False},
         poolclass=StaticPool,
     )
     Base.metadata.create_all(engine)
-    factory = sessionmaker(bind=engine, expire_on_commit=False)
-    session = factory()
     try:
-        yield session
+        yield engine
     finally:
-        session.close()
         engine.dispose()
 
-
 @pytest.fixture()
-def app(db_session: Session) -> FastAPI:
-    """Build an app whose database dependency is overridden to the test session.
+def app(db_engine) -> FastAPI:
+    """Build an app whose session factory is overridden to the test engine.
 
-    This is the payoff of dependency injection: the real get_db_session is
-    replaced by one yielding the in-memory session, so integration tests hit
-    the full stack without touching the production database.
+    Overriding get_session_factory (not get_db_session) means the real
+    unit-of-work dependency runs in tests, exercising its commit/rollback.
     """
     application = create_app()
+    test_factory = sessionmaker(bind=db_engine, expire_on_commit=False)
 
-    def override_get_db_session() -> Iterator[Session]:
-        yield db_session
+    def override_get_session_factory() -> sessionmaker[Session]:
+        return test_factory
 
-    application.dependency_overrides[get_db_session] = override_get_db_session
+    application.dependency_overrides[get_session_factory] = override_get_session_factory
     return application
 
 
