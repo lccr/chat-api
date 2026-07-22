@@ -20,6 +20,13 @@ class SuccessResponse(BaseModel, Generic[DataT]):
     status: Literal["success"] = "success"
     data: DataT
 
+class PaginatedData(BaseModel, Generic[DataT]):
+    """A page of items plus the metadata needed to navigate pages."""
+
+    items: list[DataT]
+    total: int
+    limit: int
+    offset: int
 
 class ErrorDetail(BaseModel):
     """Machine-readable error description."""
