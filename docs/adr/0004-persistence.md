@@ -1,4 +1,4 @@
-# 4. Persistencia con SQLite tras una costura de repositorio
+# 4. Persistencia con SQLite tras un punto de desacople del repositorio
 
 Fecha: 2026-07-22
 
@@ -15,7 +15,7 @@ del esquema).
 
 ## Decisión
 
-Usar SQLite a través de SQLAlchemy 2.0, tras la costura `MessageRepository`
+Usar SQLite a través de SQLAlchemy 2.0, tras un punto de desacople `MessageRepository`
 del ADR-0002. Crear el esquema al arranque con `Base.metadata.create_all`.
 Persistir todos los datetimes mediante un tipo `UTCDateTime` propio.
 
@@ -36,7 +36,7 @@ Persistir todos los datetimes mediante un tipo `UTCDateTime` propio.
 - SQLite es de un solo escritor y basado en archivo, lo que restringe el
   despliegue en la nube: los destinos serverless con sistemas de archivos
   efímeros o múltiples instancias no son adecuados sin un volumen compartido y
-  persistente. Como la persistencia vive tras la costura del repositorio,
+  persistente. Como la persistencia vive tras un punto de desacople del repositorio,
   migrar a una base de datos gestionada (Cloud SQL, RDS o un Postgres
   serverless) afecta solo el composition root y la cadena de conexión, no el
   dominio.
