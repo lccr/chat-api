@@ -1,42 +1,45 @@
-# 5. Uniform error envelope with domain exception translation
+# 5. Envelope de error uniforme con traducción de excepciones de dominio
 
-Date: 2026-07-22
+Fecha: 2026-07-22
 
-## Status
+## Estado
 
-Accepted
+Aceptada
 
-## Context
+## Contexto
 
-The assessment requires robust, user-friendly error handling with appropriate
-HTTP status codes and a consistent error response shape. Errors arise from
-several sources: invalid payloads, business rule violations (duplicate id),
-missing resources, framework routing errors (404, 405), and unexpected
-failures.
+El assessment requiere un manejo de errores robusto y amigable para el
+usuario, con códigos de estado HTTP apropiados y una forma de respuesta de
+error consistente. Los errores surgen de varias fuentes: payloads inválidos,
+violaciones de reglas de negocio (id duplicado), recursos inexistentes,
+errores de enrutamiento del framework (404, 405) y fallos inesperados.
 
-## Decision
+## Decisión
 
-Every response — success or error — shares one top-level envelope. Errors are
-modeled as a `DomainError` hierarchy raised by the domain, each carrying a
-stable machine-readable `code` and an HTTP `status_code`. Centralized
-exception handlers translate exceptions into the error envelope at the API
-boundary; the domain never raises framework HTTP exceptions.
+Toda respuesta — de éxito o de error — comparte un mismo envelope de nivel
+superior. Los errores se modelan como una jerarquía `DomainError` que lanza el
+dominio, cada uno con un `code` estable y legible por máquina y un
+`status_code` HTTP. Handlers de excepción centralizados traducen las
+excepciones al envelope de error en la frontera de la API; el dominio nunca
+lanza excepciones HTTP del framework.
 
-## Consequences
+## Consecuencias
 
-- The domain raises framework-agnostic errors (`InvalidFormatError`,
-  `DuplicateMessageError`, `NotFoundError`), so business logic could be
-  rehosted under another framework by rewriting only the handlers.
-- Four handlers cover four failure classes: domain errors, request-validation
-  errors, framework HTTP errors, and any unhandled exception. No endpoint can
-  leak FastAPI's default 422 body, Starlette's default 404 body, or a stack
-  trace.
-- FastAPI's `RequestValidationError` is intercepted and reflattened into the
-  envelope, so validation failures use the same shape as every other error.
-- The last-resort handler logs the full exception server-side and returns a
-  generic message to the client ("log everything, expose nothing"), avoiding
-  information disclosure.
-- Error codes are stable and distinct from HTTP status, so clients can branch
-  on `code` without parsing human-readable messages. New error types are added
-  by subclassing `DomainError` with a `code` and `status_code` — four lines,
-  no changes to the handlers (Open/Closed).
+- El dominio lanza errores agnósticos del framework (`InvalidFormatError`,
+  `DuplicateMessageError`, `NotFoundError`), de modo que la lógica de negocio
+  podría rehospedarse bajo otro framework reescribiendo solo los handlers.
+- Cuatro handlers cubren cuatro clases de fallo: errores de dominio, errores
+  de validación de peticiones, errores HTTP del framework y cualquier
+  excepción no controlada. Ningún endpoint puede filtrar el cuerpo 422 por
+  defecto de FastAPI, el cuerpo 404 por defecto de Starlette ni un stack trace.
+- El `RequestValidationError` de FastAPI se intercepta y se reaplana dentro
+  del envelope, de modo que los fallos de validación usan la misma forma que
+  cualquier otro error.
+- El handler de último recurso registra la excepción completa del lado del
+  servidor y devuelve un mensaje genérico al cliente ("registrar todo, exponer
+  nada"), evitando la divulgación de información.
+- Los códigos de error son estables y distintos del estado HTTP, de modo que
+  los clientes pueden ramificar según el `code` sin parsear mensajes legibles
+  por humanos. Los nuevos tipos de error se agregan heredando de `DomainError`
+  con un `code` y un `status_code` — cuatro líneas, sin cambios en los handlers
+  (Open/Closed).
