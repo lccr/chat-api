@@ -1,43 +1,47 @@
-# 2. Dependency inversion via protocols and a composition root
+# 2. Inversión de dependencias mediante protocolos y un composition root
 
-Date: 2026-07-22
+Fecha: 2026-07-22
 
-## Status
+## Estado
 
-Accepted
+Aceptada
 
-## Context
+## Contexto
 
-The layers defined in ADR-0001 must be wired together without coupling the
-domain to concrete implementations. The service layer needs a repository and
-a processing pipeline, but must not depend on SQLite or on how those
-collaborators are constructed. Tests must be able to substitute fakes.
+Las capas definidas en el ADR-0001 deben conectarse entre sí sin acoplar el
+dominio a implementaciones concretas. La capa de servicios necesita un
+repositorio y un pipeline de procesamiento, pero no debe depender de SQLite ni
+de cómo se construyen esos colaboradores. Las pruebas deben poder sustituirlos
+por dobles (fakes).
 
-## Decision
+## Decisión
 
-Depend on **abstractions** expressed as `typing.Protocol`, and concentrate
-all concrete choices in a single **composition root** (`app/api/deps.py`).
+Depender de **abstracciones** expresadas como `typing.Protocol`, y concentrar
+todas las elecciones concretas en un único **composition root**
+(`app/api/deps.py`).
 
-- `MessageRepository` and `ProcessingStep` are Protocols. Implementations
-  satisfy them structurally — they neither import nor inherit from the
-  Protocol — and are verified at the injection point by the type checker.
-- Collaborators are passed through constructors (the service receives its
-  repository and steps; the repository receives its session). Nothing reaches
-  for global state.
-- `deps.py` is the only module that names concrete classes and builds them.
-  Application-scoped, stateless collaborators (pipeline steps, engine) are
-  built once; request-scoped, stateful ones (the database session) are built
-  per request.
+- `MessageRepository` y `ProcessingStep` son Protocols. Las implementaciones
+  los satisfacen estructuralmente — no importan ni heredan del Protocol — y se
+  verifican en el punto de inyección mediante el verificador de tipos.
+- Los colaboradores se pasan por constructor (el servicio recibe su
+  repositorio y sus pasos; el repositorio recibe su sesión). Nada accede a
+  estado global.
+- `deps.py` es el único módulo que nombra clases concretas y las construye.
+  Los colaboradores de ámbito de aplicación y sin estado (pasos del pipeline,
+  engine) se construyen una vez; los de ámbito de petición y con estado (la
+  sesión de base de datos) se construyen por petición.
 
-## Consequences
+## Consecuencias
 
-- The service is tested with an in-memory fake repository and no database,
-  proving the domain is decoupled from persistence.
-- Swapping SQLite for another database changes one place — the composition
-  root — not the domain.
-- The database session dependency owns the unit-of-work boundary: it commits
-  when the request handler returns normally and rolls back on any exception,
-  while repositories only flush. This keeps a request atomic.
-- Using Protocols over abstract base classes means implementations carry no
-  dependency on the abstraction, at the cost that conformance is only checked
-  where an implementation is actually injected.
+- El servicio se prueba con un repositorio falso en memoria y sin base de
+  datos, lo que demuestra que el dominio está desacoplado de la persistencia.
+- Cambiar SQLite por otra base de datos afecta un solo lugar — el composition
+  root — no el dominio.
+- La dependencia de sesión de base de datos gobierna la frontera de la unidad
+  de trabajo: hace commit cuando el handler de la petición retorna con
+  normalidad y rollback ante cualquier excepción, mientras que los
+  repositorios solo hacen flush. Esto mantiene atómica cada petición.
+- Usar Protocols en lugar de clases base abstractas hace que las
+  implementaciones no carguen ninguna dependencia hacia la abstracción, a
+  cambio de que la conformidad solo se verifique donde una implementación se
+  inyecta realmente.
