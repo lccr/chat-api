@@ -6,9 +6,10 @@ logic lives in the service and pipeline; validation lives in the schemas.
 
 from typing import Annotated, cast
 
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import APIRouter, Depends, Query, Request, status
 
 from app.api.deps import MessageServiceDep, require_api_key
+from app.core.rate_limit import default_limit, limiter
 from app.models.message import Message
 from app.schemas.common import PaginatedData, SuccessResponse
 from app.schemas.message import MessageCreate, MessageMetadata, MessageResponse, Sender
@@ -43,7 +44,9 @@ def _to_response(message: Message) -> MessageResponse:
     response_model=SuccessResponse[MessageResponse],
     status_code=status.HTTP_201_CREATED,
 )
+@limiter.limit(default_limit())
 def create_message(
+    request: Request,
     payload: MessageCreate,
     service: MessageServiceDep,
 ) -> SuccessResponse[MessageResponse]:
@@ -55,7 +58,9 @@ def create_message(
     "/search",
     response_model=SuccessResponse[PaginatedData[MessageResponse]],
 )
+@limiter.limit(default_limit())
 def search_messages(
+    request: Request,
     service: MessageServiceDep,
     q: Annotated[str, Query(min_length=1, max_length=200)],
     limit: Annotated[int, Query(ge=1, le=100)] = 20,
@@ -78,7 +83,9 @@ def search_messages(
     "/{session_id}",
     response_model=SuccessResponse[PaginatedData[MessageResponse]],
 )
+@limiter.limit(default_limit())
 def list_messages(
+    request: Request,
     session_id: str,
     service: MessageServiceDep,
     limit: Annotated[int, Query(ge=1, le=100)] = 20,

@@ -51,3 +51,9 @@ class UnauthorizedError(DomainError):
 
     code = "UNAUTHORIZED"
     status_code = 401
+
+class RateLimitExceededError(DomainError):
+    """Too many requests from the same client."""
+
+    code = "RATE_LIMIT_EXCEEDED"
+    status_code = 429

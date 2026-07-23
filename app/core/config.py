@@ -30,6 +30,10 @@ class Settings(BaseSettings):
     # Empty string disables auth (useful for local development and tests).
     api_key: str = ""
 
+    # Rate limiting: requests allowed per client, per window.
+    # Empty string disables the limiter (useful in tests).
+    rate_limit: str = ""
+
     @property
     def banned_words_list(self) -> list[str]:
         """Return the banned words as a normalized list."""
