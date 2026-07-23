@@ -27,10 +27,30 @@ por defecto razonables para desarrollo local.
 | Variable | Descripción | Por defecto |
 | -------- | ----------- | ----------- |
 | `APP_DATABASE_URL` | Cadena de conexión de la base de datos | `sqlite:///./chat_data.db` |
+| `APP_API_KEY` | Clave de API requerida en los endpoints de /api. Vacía desactiva la autenticación | `(vacía)` |
 | `APP_BANNED_WORDS` | Palabras a censurar, separadas por comas | `badword,offensive` |
 | `APP_DEBUG` | Modo debug | `false` |
 | `APP_DEFAULT_PAGE_LIMIT` | Límite de paginación por defecto | `20` |
 | `APP_MAX_PAGE_LIMIT` | Límite máximo de paginación | `100` |
+
+
+## Autenticación
+
+Los endpoints bajo `/api` aceptan autenticación por clave de API mediante la
+cabecera `X-API-Key`. Está desactivada por defecto (`APP_API_KEY` vacía) para
+facilitar el desarrollo local y las pruebas; se activa definiendo la variable:
+
+```bash
+APP_API_KEY=mi-clave-secreta uvicorn app.main:app
+```
+
+```bash
+curl -H "X-API-Key: mi-clave-secreta" localhost:8000/api/messages/session-1
+```
+
+Sin clave válida, la respuesta es `401` con código de error `UNAUTHORIZED`. El
+endpoint `/health` queda fuera de la autenticación, ya que las verificaciones
+de estado de la infraestructura no se autentican.
 
 ## Verificación de calidad
 
