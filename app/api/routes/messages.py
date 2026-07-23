@@ -6,14 +6,18 @@ logic lives in the service and pipeline; validation lives in the schemas.
 
 from typing import Annotated, cast
 
-from fastapi import APIRouter, Query, status
+from fastapi import APIRouter, Depends, Query, status
 
-from app.api.deps import MessageServiceDep
+from app.api.deps import MessageServiceDep, require_api_key
 from app.models.message import Message
 from app.schemas.common import PaginatedData, SuccessResponse
 from app.schemas.message import MessageCreate, MessageMetadata, MessageResponse, Sender
 
-router = APIRouter(prefix="/api/messages", tags=["messages"])
+router = APIRouter(
+    prefix="/api/messages",
+    tags=["messages"],
+    dependencies=[Depends(require_api_key)],
+)
 
 
 def _to_response(message: Message) -> MessageResponse:

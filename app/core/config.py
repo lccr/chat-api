@@ -26,6 +26,10 @@ class Settings(BaseSettings):
     default_page_limit: int = 20
     max_page_limit: int = 100
 
+    # Authentication: API key required on protected endpoints.
+    # Empty string disables auth (useful for local development and tests).
+    api_key: str = ""
+
     @property
     def banned_words_list(self) -> list[str]:
         """Return the banned words as a normalized list."""

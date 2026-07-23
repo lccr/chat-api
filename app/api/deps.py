@@ -5,15 +5,16 @@ are chosen and injected. Handlers depend on abstractions; this module decides
 what fills them. It also owns the database session lifecycle, which is where
 the unit-of-work commit/rollback lives.
 """
-
+import secrets
 from collections.abc import Iterator
 from typing import Annotated
 
-from fastapi import Depends
+from fastapi import Depends, Header
 from sqlalchemy import Engine, create_engine
 from sqlalchemy.orm import Session, sessionmaker
 
 from app.core.config import Settings, get_settings
+from app.core.exceptions import UnauthorizedError
 from app.repositories.sqlite_repository import SqliteMessageRepository
 from app.services.message_service import MessageService
 from app.services.pipeline import build_pipeline
@@ -80,6 +81,23 @@ def get_message_service(
     repository = SqliteMessageRepository(session)
     return MessageService(repository, steps)
 
+def require_api_key(
+    settings: Annotated[Settings, Depends(get_settings)],
+    x_api_key: Annotated[str | None, Header()] = None,
+) -> None:
+    """Enforce API-key authentication on protected endpoints.
+
+    If no API key is configured (settings.api_key is empty), authentication is
+    disabled — convenient for local development and tests. Otherwise a valid
+    ``X-API-Key`` header is required.
+    """
+    if not settings.api_key:
+        return
+    if x_api_key is None or not secrets.compare_digest(x_api_key, settings.api_key):
+        raise UnauthorizedError(
+            message="Missing or invalid API key",
+            details="Provide a valid X-API-Key header",
+        )
 
 SettingsDep = Annotated[Settings, Depends(get_settings)]
 MessageServiceDep = Annotated[MessageService, Depends(get_message_service)]
