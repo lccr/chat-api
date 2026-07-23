@@ -56,6 +56,7 @@ por defecto razonables para desarrollo local.
 | `APP_DATABASE_URL` | Cadena de conexión de la base de datos | `sqlite:///./chat_data.db` |
 | `APP_API_KEY` | Clave de API requerida en los endpoints de /api. Vacía desactiva la autenticación | `(vacía)` |
 | `APP_BANNED_WORDS` | Palabras a censurar, separadas por comas | `badword,offensive` |
+| `APP_RATE_LIMIT` | Límite de peticiones por cliente (formato N/periodo). Vacío lo desactiva | `(vacío)` |
 | `APP_DEBUG` | Modo debug | `false` |
 | `APP_DEFAULT_PAGE_LIMIT` | Límite de paginación por defecto | `20` |
 | `APP_MAX_PAGE_LIMIT` | Límite máximo de paginación | `100` |
@@ -78,6 +79,18 @@ curl -H "X-API-Key: mi-clave-secreta" localhost:8000/api/messages/session-1
 Sin clave válida, la respuesta es `401` con código de error `UNAUTHORIZED`. El
 endpoint `/health` queda fuera de la autenticación, ya que las verificaciones
 de estado de la infraestructura no se autentican.
+
+## Limitación de tasa
+
+La aplicación incluye limitación de tasa por dirección IP, desactivada por
+defecto y configurable con `APP_RATE_LIMIT` (por ejemplo, `60/minute`). Al
+superar el límite, la respuesta es `429` con código `RATE_LIMIT_EXCEEDED`.
+
+Es una medida de defensa en profundidad: el control principal corresponde a la
+capa de infraestructura —API gateway, balanceador o proxy inverso—, donde el
+tráfico abusivo se rechaza antes de consumir recursos de la aplicación y el
+conteo es global en lugar de por instancia. Ver
+[ADR-0008](docs/adr/0008-rate-limiting.md).
 
 ## Verificación de calidad
 
