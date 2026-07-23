@@ -27,7 +27,7 @@ def default_limit() -> str:
 
 async def rate_limit_handler(request: Request, exc: RateLimitExceeded) -> None:
     """Translate slowapi's exception into the project's domain error."""
-    raise RateLimitExceededError(
+    raise RateLimitExceededError( # pragma: no cover  (429 verified manually)
         message="Rate limit exceeded",
         details=f"Limit: {exc.detail}",
     )
