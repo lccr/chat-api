@@ -184,6 +184,14 @@ depende de abstracciones (`Protocol`) y recibe sus colaboradores por
 inyección. Esto permite probar la lógica de negocio sin base de datos y
 sustituir la persistencia sin tocar el dominio.
 
+## Infraestructura
+
+En [`infra/`](infra/) hay una propuesta de despliegue en AWS definida con
+Terraform (ECR + App Runner + Secrets Manager, con limitación de tasa en el
+edge). La definición está validada sintácticamente pero no se ha aplicado;
+el razonamiento y las alternativas consideradas están en su propio
+[README](infra/README.md).
+
 ## Decisiones de diseño
 
 Las decisiones de arquitectura están documentadas como ADRs en

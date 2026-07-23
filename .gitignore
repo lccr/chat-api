@@ -101,3 +101,9 @@ docker-compose.override.yml
 .build/
 .aws-sam/
 .serverless/
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
