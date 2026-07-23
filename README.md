@@ -24,6 +24,8 @@ El flujo de un mensaje entrante es:
    duplicarse.
 4. **Recuperación** — los mensajes de una sesión se consultan de forma
    paginada, con filtro opcional por remitente.
+5. **Búsqueda** — el contenido de los mensajes se indexa para búsqueda de
+   texto completo, permitiendo consultarlos por relevancia.
 
 Todas las respuestas, de éxito o de error, comparten un mismo formato, y los
 errores devuelven códigos HTTP y códigos de error estables y documentados.
@@ -95,6 +97,7 @@ actual alcanza el 100% sobre líneas alcanzables.
 | ------ | ---- | ----------- |
 | `POST` | `/api/messages` | Crea, procesa y almacena un mensaje |
 | `GET` | `/api/messages/{session_id}` | Lista los mensajes de una sesión (paginado, filtrable por remitente) |
+| `GET` | `/api/messages/search` | Búsqueda de texto completo sobre el contenido, ordenada por relevancia |
 | `GET` | `/health` | Verificación de estado del servicio |
 
 ### POST /api/messages
@@ -120,6 +123,18 @@ tiempo de procesamiento).
 Parámetros de consulta: `limit` (1–100, por defecto 20), `offset` (≥0, por
 defecto 0), `sender` (`user` o `system`, opcional). Devuelve una página de
 mensajes junto con el total, el límite y el desplazamiento aplicados.
+
+### GET /api/messages/search
+
+Búsqueda de texto completo sobre el contenido de los mensajes, implementada
+con el motor FTS5 nativo de SQLite. Los resultados se ordenan por relevancia.
+
+Parámetros de consulta: `q` (término de búsqueda, requerido), `limit`, `offset`
+y `session_id` (opcional, acota la búsqueda a una sesión).
+
+```bash
+curl "localhost:8000/api/messages/search?q=pedido&session_id=session-abcdef"
+```
 
 ## Formato de respuesta
 
