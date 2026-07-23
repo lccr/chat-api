@@ -14,6 +14,7 @@ from app.api.routes.messages import router as messages_router
 from app.core.config import get_settings
 from app.core.logging import configure_logging
 from app.models.base import Base
+from app.models.fts import create_fts_schema
 
 
 def create_app() -> FastAPI:
@@ -23,6 +24,7 @@ def create_app() -> FastAPI:
 
     # Schema is created on startup; migrations are out of scope here.
     Base.metadata.create_all(bind=get_engine())
+    create_fts_schema(get_engine())
 
     app = FastAPI(
         title=settings.app_name,

@@ -5,7 +5,7 @@ inherit from the protocol (structural typing): mypy verifies conformance at
 the point of injection.
 """
 
-from sqlalchemy import func, select
+from sqlalchemy import func, select, text
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -65,3 +65,46 @@ class SqliteMessageRepository:
         )
         messages = list(self._session.scalars(stmt).all())
         return messages, total or 0
+
+    def search(
+        self,
+        query: str,
+        *,
+        limit: int,
+        offset: int,
+        session_id: str | None = None,
+    ) -> tuple[list[Message], int]:
+        """Search message content using the FTS5 index, ranked by relevance."""
+        # FTS5 treats several characters as query syntax; quoting the term
+        # makes it a literal phrase and avoids syntax errors on user input.
+        match_expression = f'"{query}"'
+
+        conditions = ["messages_fts MATCH :match"]
+        params: dict[str, object] = {"match": match_expression}
+        if session_id is not None:
+            conditions.append("m.session_id = :session_id")
+            params["session_id"] = session_id
+        where_clause = " AND ".join(conditions)
+
+        total_sql = text(
+            f"SELECT count(*) FROM messages_fts "  # noqa: S608
+            f"JOIN messages m ON m.id = messages_fts.rowid WHERE {where_clause}"
+        )
+        total = self._session.scalar(total_sql, params) or 0
+
+        rows_sql = text(
+            f"SELECT m.id FROM messages_fts "  # noqa: S608
+            f"JOIN messages m ON m.id = messages_fts.rowid WHERE {where_clause} "
+            f"ORDER BY rank LIMIT :limit OFFSET :offset"
+        )
+        ids = list(
+            self._session.scalars(rows_sql, {**params, "limit": limit, "offset": offset})
+        )
+        if not ids:
+            return [], total
+
+        # Re-fetch as ORM objects, preserving the relevance order from FTS.
+        messages = list(self._session.scalars(select(Message).where(Message.id.in_(ids))))
+        by_id = {m.id: m for m in messages}
+        ordered = [by_id[i] for i in ids if i in by_id]
+        return ordered, total

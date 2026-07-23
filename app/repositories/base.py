@@ -39,3 +39,17 @@ class MessageRepository(Protocol):
         clients can compute how many pages exist.
         """
         ...  # pragma: no cover
+
+    def search(
+        self,
+        query: str,
+        *,
+        limit: int,
+        offset: int,
+        session_id: str | None = None,
+    ) -> tuple[list[Message], int]:
+        """Return messages whose content matches the full-text query.
+
+        Results are ordered by relevance. Optionally scoped to one session.
+        """
+        ...  # pragma: no cover

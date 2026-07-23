@@ -12,6 +12,7 @@ import pytest
 from app.api.deps import get_session_factory
 from app.main import create_app
 from app.models.base import Base
+from app.models.fts import create_fts_schema
 from app.schemas.message import MessageCreate
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
@@ -51,6 +52,7 @@ def db_engine():
         poolclass=StaticPool,
     )
     Base.metadata.create_all(engine)
+    create_fts_schema(engine)
     try:
         yield engine
     finally:

@@ -51,6 +51,28 @@ def create_message(
     message = service.create_message(payload)
     return SuccessResponse(data=_to_response(message))
 
+@router.get(
+    "/search",
+    response_model=SuccessResponse[PaginatedData[MessageResponse]],
+)
+def search_messages(
+    service: MessageServiceDep,
+    q: Annotated[str, Query(min_length=1, max_length=200)],
+    limit: Annotated[int, Query(ge=1, le=100)] = 20,
+    offset: Annotated[int, Query(ge=0)] = 0,
+    session_id: Annotated[str | None, Query()] = None,
+) -> SuccessResponse[PaginatedData[MessageResponse]]:
+    """Full-text search over message content, ranked by relevance."""
+    messages, total = service.search_messages(
+        q, limit=limit, offset=offset, session_id=session_id
+    )
+    page: PaginatedData[MessageResponse] = PaginatedData(
+        items=[_to_response(m) for m in messages],
+        total=total,
+        limit=limit,
+        offset=offset,
+    )
+    return SuccessResponse(data=page)
 
 @router.get(
     "/{session_id}",
