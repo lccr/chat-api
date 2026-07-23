@@ -1,7 +1,32 @@
 # Chat API
 
-API RESTful para procesamiento de mensajes de chat, construida con **FastAPI**,
-**SQLAlchemy 2.0** y **SQLite**, siguiendo principios de arquitectura limpia.
+API RESTful para el procesamiento y almacenamiento de mensajes de chat,
+construida con **FastAPI**, **SQLAlchemy 2.0** y **SQLite**, siguiendo
+principios de arquitectura limpia.
+
+## Descripción general
+
+El servicio recibe mensajes de chat, los valida, los procesa a través de un
+pipeline y los almacena, permitiendo luego recuperarlos por sesión.
+
+El flujo de un mensaje entrante es:
+
+1. **Validación de formato** — los esquemas Pydantic verifican en la frontera
+   de la API que el mensaje tenga todos los campos requeridos, con los tipos
+   correctos y un remitente válido (`user` o `system`). Las marcas de tiempo se
+   normalizan a UTC.
+2. **Procesamiento** — un pipeline de pasos independientes transforma el
+   mensaje: censura las palabras prohibidas configuradas y calcula metadatos
+   (conteo de palabras, conteo de caracteres y marca de tiempo de
+   procesamiento).
+3. **Almacenamiento** — el mensaje procesado se persiste; el `message_id` es
+   único, de modo que un reenvío del mismo mensaje se rechaza en lugar de
+   duplicarse.
+4. **Recuperación** — los mensajes de una sesión se consultan de forma
+   paginada, con filtro opcional por remitente.
+
+Todas las respuestas, de éxito o de error, comparten un mismo formato, y los
+errores devuelven códigos HTTP y códigos de error estables y documentados.
 
 ## Requisitos
 
