@@ -52,9 +52,7 @@ class SqliteMessageRepository:
         if sender is not None:
             filters.append(Message.sender == sender)
 
-        total = self._session.scalar(
-            select(func.count()).select_from(Message).where(*filters)
-        )
+        total = self._session.scalar(select(func.count()).select_from(Message).where(*filters))
 
         stmt = (
             select(Message)
@@ -97,9 +95,7 @@ class SqliteMessageRepository:
             f"JOIN messages m ON m.id = messages_fts.rowid WHERE {where_clause} "
             f"ORDER BY rank LIMIT :limit OFFSET :offset"
         )
-        ids = list(
-            self._session.scalars(rows_sql, {**params, "limit": limit, "offset": offset})
-        )
+        ids = list(self._session.scalars(rows_sql, {**params, "limit": limit, "offset": offset}))
         if not ids:
             return [], total
 

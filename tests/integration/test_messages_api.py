@@ -37,9 +37,7 @@ class TestCreateMessageEndpoint:
         assert body["data"]["metadata"]["word_count"] == 2
 
     def test_censors_banned_content(self, client: TestClient) -> None:
-        response = client.post(
-            "/api/messages", json=_valid_body(content="hello badword")
-        )
+        response = client.post("/api/messages", json=_valid_body(content="hello badword"))
         assert response.status_code == 201
         assert response.json()["data"]["content"] == "hello *******"
 

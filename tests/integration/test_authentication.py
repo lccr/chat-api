@@ -38,17 +38,13 @@ class TestApiKeyAuthentication:
         assert body["error"]["code"] == "UNAUTHORIZED"
 
     def test_request_with_wrong_key_is_rejected(self, secured_client: TestClient) -> None:
-        response = secured_client.get(
-            "/api/messages/s1", headers={"X-API-Key": "wrong-key"}
-        )
+        response = secured_client.get("/api/messages/s1", headers={"X-API-Key": "wrong-key"})
 
         assert response.status_code == 401
         assert response.json()["error"]["code"] == "UNAUTHORIZED"
 
     def test_request_with_valid_key_succeeds(self, secured_client: TestClient) -> None:
-        response = secured_client.get(
-            "/api/messages/s1", headers={"X-API-Key": API_KEY}
-        )
+        response = secured_client.get("/api/messages/s1", headers={"X-API-Key": API_KEY})
 
         assert response.status_code == 200
         assert response.json()["status"] == "success"

@@ -5,6 +5,7 @@ are chosen and injected. Handlers depend on abstractions; this module decides
 what fills them. It also owns the database session lifecycle, which is where
 the unit-of-work commit/rollback lives.
 """
+
 import secrets
 from collections.abc import Iterator
 from typing import Annotated
@@ -39,6 +40,7 @@ _pipeline_steps: list[ProcessingStep] = build_pipeline(_settings.banned_words_li
 def get_engine() -> Engine:
     """Expose the engine so startup code can create the schema."""
     return _engine
+
 
 def get_session_factory() -> sessionmaker[Session]:
     """Return the application's session factory (overridable in tests)."""
@@ -81,6 +83,7 @@ def get_message_service(
     repository = SqliteMessageRepository(session)
     return MessageService(repository, steps)
 
+
 def require_api_key(
     settings: Annotated[Settings, Depends(get_settings)],
     x_api_key: Annotated[str | None, Header()] = None,
@@ -98,6 +101,7 @@ def require_api_key(
             message="Missing or invalid API key",
             details="Provide a valid X-API-Key header",
         )
+
 
 SettingsDep = Annotated[Settings, Depends(get_settings)]
 MessageServiceDep = Annotated[MessageService, Depends(get_message_service)]

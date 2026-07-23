@@ -17,9 +17,7 @@ class UTCDateTime(TypeDecorator[datetime]):
     impl = DateTime
     cache_ok = True
 
-    def process_bind_param(
-        self, value: datetime | None, dialect: Dialect
-    ) -> datetime | None:
+    def process_bind_param(self, value: datetime | None, dialect: Dialect) -> datetime | None:
         """Normalize to UTC just before writing to the database."""
         if value is None:
             return None
@@ -27,9 +25,7 @@ class UTCDateTime(TypeDecorator[datetime]):
             return value.replace(tzinfo=timezone.utc)
         return value.astimezone(timezone.utc)
 
-    def process_result_value(
-        self, value: datetime | None, dialect: Dialect
-    ) -> datetime | None:
+    def process_result_value(self, value: datetime | None, dialect: Dialect) -> datetime | None:
         """Re-attach UTC when reading a naive datetime back from storage."""
         if value is None:
             return None

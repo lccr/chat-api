@@ -46,11 +46,13 @@ class NotFoundError(DomainError):
     code = "NOT_FOUND"
     status_code = 404
 
+
 class UnauthorizedError(DomainError):
     """Authentication failed: missing or invalid API key."""
 
     code = "UNAUTHORIZED"
     status_code = 401
+
 
 class RateLimitExceededError(DomainError):
     """Too many requests from the same client."""

@@ -58,6 +58,7 @@ def db_engine():
     finally:
         engine.dispose()
 
+
 @pytest.fixture()
 def app(db_engine) -> FastAPI:
     """Build an app whose session factory is overridden to the test engine.

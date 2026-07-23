@@ -23,9 +23,7 @@ def build_pipeline(banned_words: list[str]) -> list[ProcessingStep]:
     ]
 
 
-def run_pipeline(
-    message: MessageCreate, steps: list[ProcessingStep]
-) -> ProcessingResult:
+def run_pipeline(message: MessageCreate, steps: list[ProcessingStep]) -> ProcessingResult:
     """Thread a message through every step and return the final result."""
     result = ProcessingResult(content=message.content)
     for step in steps:

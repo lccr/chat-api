@@ -19,9 +19,11 @@ limiter = Limiter(
     enabled=bool(get_settings().rate_limit),
 )
 
+
 def default_limit() -> str:
     """Return the configured rate limit, or an effectively unlimited value."""
     return get_settings().rate_limit or "1000/second"
+
 
 async def rate_limit_handler(request: Request, exc: RateLimitExceeded) -> None:
     """Translate slowapi's exception into the project's domain error."""
@@ -35,5 +37,3 @@ def register_rate_limiting(app: FastAPI) -> None:
     """Attach the limiter and its exception handler to the application."""
     app.state.limiter = limiter
     app.add_exception_handler(RateLimitExceeded, rate_limit_handler)  # type: ignore[arg-type]
-
-

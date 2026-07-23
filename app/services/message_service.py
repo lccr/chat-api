@@ -66,6 +66,4 @@ class MessageService:
         session_id: str | None = None,
     ) -> tuple[list[Message], int]:
         """Search stored messages by content, optionally scoped to a session."""
-        return self._repository.search(
-            query, limit=limit, offset=offset, session_id=session_id
-        )
+        return self._repository.search(query, limit=limit, offset=offset, session_id=session_id)

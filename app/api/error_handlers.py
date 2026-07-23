@@ -37,9 +37,7 @@ async def domain_error_handler(request: Request, exc: DomainError) -> JSONRespon
     )
 
 
-async def validation_error_handler(
-    request: Request, exc: RequestValidationError
-) -> JSONResponse:
+async def validation_error_handler(request: Request, exc: RequestValidationError) -> JSONResponse:
     """Translate Pydantic validation failures into the error envelope."""
     details = [
         f"{'.'.join(str(loc) for loc in err['loc'] if loc != 'body')}: {err['msg']}"
@@ -60,14 +58,13 @@ async def unhandled_error_handler(request: Request, exc: Exception) -> JSONRespo
         content=_envelope("INTERNAL_ERROR", "An unexpected error occurred"),
     )
 
-async def http_exception_handler(
-        request: Request, exc: StarletteHTTPException
-        ) -> JSONResponse:
-     """Wrap framework HTTP errors (404, 405, ...) in the error envelope."""
-     return JSONResponse(
-         status_code=exc.status_code,
-         content=_envelope("HTTP_ERROR", str(exc.detail)),
-         )
+
+async def http_exception_handler(request: Request, exc: StarletteHTTPException) -> JSONResponse:
+    """Wrap framework HTTP errors (404, 405, ...) in the error envelope."""
+    return JSONResponse(
+        status_code=exc.status_code,
+        content=_envelope("HTTP_ERROR", str(exc.detail)),
+    )
 
 
 def register_error_handlers(app: FastAPI) -> None:
